@@ -1,12 +1,15 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { InjectDataSource, TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Doctor } from './entities/doctor.entity';
 import { Patient } from './entities/patient.entity';
 import { Appointment } from './entities/appointment.entity';
 import { Queue } from './entities/queue.entity';
-import { DataSource } from 'typeorm';
 import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { QueueModule } from './queue/queue.module';
+import { AppointmentsModule } from './appointment/appointment.module';
 
 @Module({
   imports: [
@@ -18,14 +21,16 @@ import { AuthModule } from './auth/auth.module';
       password: '1234',
       database: 'front_desk_system',
       entities: [User, Doctor, Patient, Appointment, Queue],
-      synchronize: false, // we already have DB tables
+      synchronize: true, // ⬅ Set to true only for first run/testing
     }),
-    TypeOrmModule.forFeature([User, Doctor, Patient, Appointment, Queue]),
     AuthModule,
+    UserModule,
+    QueueModule,
+    AppointmentsModule,
   ],
 })
 export class AppModule implements OnModuleInit {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   async onModuleInit() {
     if (this.dataSource.isInitialized) {
